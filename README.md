@@ -16,7 +16,7 @@
 3. 使用 `订阅 ID` 查询数据库, 获得 `订阅 URL` 并交给后端代理。
 
 
-可以设置特权用户。在 `app.py` 中搜索 `29403` 即可更改。
+可以设置特权用户。在 `app.py` 中搜索 `29403` 即可更改。`29403` 是从 OAuth 应用获取的 `id` 参数。
 1. 一种特权用户允许在较低等级绕过等级限制直接访问 FSSP;
 2. 一种特权用户可以在管理面板中删除任何人的订阅。
 
@@ -42,3 +42,8 @@
 pip install -r requirements.txt
 python3 app.py
 ```
+
+#### 接入 OAuth
+1. 参考：  
+https://wiki.linux.do/services/community/Linux-Do-Connect
+2. 修改 `config.py`
