@@ -1,0 +1,5 @@
+Flask
+flask_sqlalchemy
+Requests
+SQLAlchemy
+flask_migrate
