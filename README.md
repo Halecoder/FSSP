@@ -37,13 +37,14 @@
 
 ### 部署
 #### 创建数据库并导入我提供的数据库文件
-#### 安装所需库并启动
-```
-pip install -r requirements.txt
-python3 app.py
-```
 
 #### 接入 OAuth
 1. 参考：  
 https://wiki.linux.do/services/community/Linux-Do-Connect
 2. 修改 `config.py`
+
+#### 安装所需库并启动
+```
+pip install -r requirements.txt
+python3 app.py
+```
