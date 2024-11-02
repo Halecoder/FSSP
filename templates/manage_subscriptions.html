@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FSSP 管理面板</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #34597d;
+            --primary-light: #BBDEFB;
+            --primary-dark: #0D47A1;
+            --accent-color: #FF4081;
+            --text-color: #212121;
+            --background-color: #F5F5F5;
+            --card-color: #FFFFFF;
+            --shadow: 0 2px 5px rgba(0,0,0,0.1);
+            --success-color: #4CAF50;
+            --success-hover-color: #45A049;
+        }
+
+        body {
+            font-family: 'Roboto', Arial, sans-serif;
+            line-height: 1.6;
+            color: var(--text-color);
+            background-color: var(--background-color);
+            margin: 0;
+            padding: 20px;
+        }
+
+        h1 {
+            color: var(--primary-color);
+            text-align: center;
+            font-weight: 300;
+            margin-bottom: 5px;
+        }
+
+        #user-greeting {
+            text-align: center;
+            font-size: 1.25em; /* 字体增大 */
+            color: var(--primary-color); /* 使用与标题相同的颜色 */
+            margin-bottom: 30px;
+        }
+
+        #share-link-button, #home-link-button {
+            position: absolute;
+            top: 20px;
+            padding: 10px 20px;
+            color: white;
+            border: none;
+            text-align: center;
+            text-decoration: none;
+            font-size: 14px;
+            border-radius: 4px;
+            cursor: pointer;
+            box-shadow: var(--shadow);
+            transition: background-color 0.3s;
+        }
+
+        #share-link-button {
+            right: 20px;
+            background-color: var(--accent-color);
+        }
+
+        #share-link-button:hover {
+            background-color: #E91E63;
+        }
+
+        #home-link-button {
+            left: 20px;
+            background-color: var(--success-color);
+        }
+
+        #home-link-button:hover {
+            background-color: var(--success-hover-color);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            background-color: var(--card-color);
+            box-shadow: var(--shadow);
+            border-radius: 8px;
+            overflow: hidden;
+            margin-top: 50px;
+        }
+
+        th, td {
+            padding: 15px;
+            text-align: left;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        th {
+            background-color: var(--primary-color);
+            color: white;
+            font-weight: 500;
+        }
+
+        tr:last-child td {
+            border-bottom: none;
+        }
+
+        .text-truncate {
+            max-width: 200px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .edit-button, .delete-button {
+            padding: 8px 12px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background-color 0.3s;
+            text-decoration: none;
+            display: inline-block;
+            margin-right: 5px;
+        }
+
+        .edit-button {
+            background-color: var(--primary-light);
+            color: var(--primary-dark);
+        }
+
+        .edit-button:hover {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        .delete-button {
+            background-color: #FFCDD2;
+            color: #C62828;
+        }
+
+        .delete-button:hover {
+            background-color: #EF5350;
+            color: white;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0,0,0,0.4);
+        }
+
+        .modal-content {
+            background-color: #fefefe;
+            margin: 15% auto;
+            padding: 20px;
+            border: 1px solid #888;
+            width: 300px;
+            border-radius: 8px;
+            box-shadow: var(--shadow);
+        }
+
+        .modal-buttons {
+            text-align: right;
+            margin-top: 20px;
+        }
+
+        .modal-button {
+            padding: 8px 12px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            margin-left: 10px;
+        }
+
+        .confirm-delete {
+            background-color: #EF5350;
+            color: white;
+        }
+
+        .cancel-delete {
+            background-color: #E0E0E0;
+            color: var(--text-color);
+        }
+    </style>
+</head>
+<body>
+    <h1>管理你分享的订阅 ✒</h1>
+    <p id="user-greeting"></p>  <!-- 这里是显示用户问候语的地方 -->
+    <a href="{{ url_for('share') }}" id="share-link-button">提交新订阅</a>
+    <a href="{{ url_for('index') }}" id="home-link-button">返回首页</a>
+    <table>
+        <tr>
+            <th>简略信息</th>
+            <th>剩余流量 (GB)</th>
+            <th>有效期至</th>
+            <th>推广</th>
+            <th>服务提供商</th>
+            <th>订阅 URL</th>
+            <th>提交时间</th>
+            <th>操作</th>
+        </tr>
+        {% for subscription in subscriptions %}
+        <tr>
+            <td>{{ subscription.get_summary_info() }}</td>
+            <td>{{ subscription.remaining_data }}</td>
+            <td>{{ subscription.expiry_date }}</td>
+            <td>{{ subscription.includes_aff }}</td>
+            <td>
+                {% if subscription.provider_url != '未填写' and subscription.provider_url != '自建' %}
+                <div class="text-truncate"><a href="{{ subscription.provider_url }}" target="_blank">{{ subscription.provider_url }}</a></div>
+                {% else %}
+                <div class="text-truncate">{{ subscription.provider_url }}</div>
+                {% endif %}
+            </td>
+            <td>
+                <div class="text-truncate"><a href="{{ subscription.subscription_url }}" target="_blank">{{ subscription.subscription_url }}</a></div>
+            </td>
+            
+            <td id="time-cell">{{ subscription.created_at.strftime('%Y-%m-%d %H:%M:%S') }} UTC+8</td>
+
+
+
+            <td>
+                <a href="{{ url_for('edit_subscription', subscription_id=subscription.id) }}" class="edit-button">编辑</a>
+                <button onclick="showDeleteConfirmation('{{ subscription.id }}')" class="delete-button">删除</button>
+                <form id="delete-form-{{ subscription.id }}" action="{{ url_for('delete_subscription', subscription_id=subscription.id) }}" method="post" style="display:none;"></form>
+            </td>
+        </tr>
+        {% endfor %}
+    </table>
+
+    <div id="deleteModal" class="modal">
+        <div class="modal-content">
+            <p>确定要删除这个订阅吗？</p>
+            <div class="modal-buttons">
+                <button onclick="cancelDelete()" class="modal-button cancel-delete">取消</button>
+                <button onclick="confirmDelete()" class="modal-button confirm-delete">确认删除</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentSubscriptionId;
+        const modal = document.getElementById("deleteModal");
+
+        function showDeleteConfirmation(subscriptionId) {
+            currentSubscriptionId = subscriptionId;
+            modal.style.display = "block";
+        }
+
+        function cancelDelete() {
+            modal.style.display = "none";
+        }
+
+        function confirmDelete() {
+            const form = document.getElementById(`delete-form-${currentSubscriptionId}`);
+            if (form) {
+                form.submit();
+            } else {
+                console.error(`Delete form not found for subscription ID: ${currentSubscriptionId}`);
+            }
+            modal.style.display = "none";
+        }
+
+        window.onclick = function(event) {
+            if (event.target == modal) {
+                modal.style.display = "none";
+            }
+        }
+
+        function convertToUTC8(utcDateStr) {
+            const utcDate = new Date(utcDateStr + 'Z'); // Ensure the date is treated as UTC
+            const offsetDate = new Date(utcDate.getTime() + 8 * 60 * 60 * 1000); // Add 8 hours
+            return offsetDate.toISOString().replace('T', ' ').substring(0, 19);
+        }
+
+        const timeCell = document.getElementById('time-cell');
+        const utcDateStr = timeCell.textContent.replace(' UTC', '');
+        timeCell.textContent = convertToUTC8(utcDateStr) + ' UTC+8';
+
+        // 获取并显示用户的 name 或 username
+        document.addEventListener('DOMContentLoaded', function() {
+            const userId = {{ session['user_info']['id'] }};  // 从 Flask session 中获取用户 ID
+            fetch(`/get_user_name/${userId}`)
+                .then(response => response.text())  // 使用 .text() 处理纯文本响应
+                .then(name => {
+                    document.getElementById('user-greeting').textContent = `${name}，感谢你的分享。`;
+                })
+                .catch(error => {
+                    console.error('Error fetching user name:', error);
+                    document.getElementById('user-greeting').textContent = `感谢你的分享。`;
+                });
+        });
+    </script>
+</body>
+</html>

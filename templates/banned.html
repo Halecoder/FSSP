@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>账户被封禁</title>
+    <style>
+        :root {
+            --primary-color: #8E9AAF;
+            --secondary-color: #e9e3ec;
+            --background-color: #F8E9EB;
+            --text-color: #4f3d7b;
+            --button-color: #FEE1E8;
+        }
+
+        body, html {
+            font-family: 'Roboto', Arial, sans-serif;
+            background-color: var(--background-color);
+            color: var(--text-color);
+            height: 100%;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            padding-top: 4vh; /* 将这里从 10vh 改为 5vh */
+            box-sizing: border-box;
+        }
+
+        .container {
+            background-color: white;
+            max-width: 400px;
+            width: 90%;
+            padding: 40px;
+            border-radius: 4px;
+            box-shadow: 0 3px 6px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+
+        h1 {
+            color: #000000;
+            font-size: 28px;
+            font-weight: 500;
+            margin-bottom: 24px;
+        }
+
+        p {
+            font-size: 16px;
+            line-height: 1.6;
+            margin-bottom: 32px;
+        }
+
+        .auth-button {
+            display: inline-block;
+            padding: 12px 24px;
+            background-color: var(--button-color);
+            color: var(--text-color);
+            text-decoration: none;
+            font-size: 16px;
+            font-weight: 500;
+            border-radius: 4px;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .auth-button:hover {
+            background-color: var(--secondary-color);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+        }
+
+        .agreement {
+            margin-top: 32px;
+            padding: 16px;
+            background-color: var(--secondary-color);
+            border-radius: 4px;
+            font-size: 15px;
+            line-height: 1.4;
+            text-align: left;
+        }
+
+        .agreement h2 {
+            font-size: 18px;
+            margin-bottom: 8px;
+        }
+
+        .agreement ol {
+            margin: 0;
+            padding-left: 20px; /* 稍微增加缩进 */
+        }
+
+        .agreement li {
+            margin-bottom: 1px; /* 增加列表项之间的间距 */
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1><strong>账户被封禁</strong></h1>
+        <p>由于你的账户存在<strong>严重违反</strong>《君子协定》的操作，管理员决定封禁你的账户。<br>如果你觉得这是一个错误，请先重试登录再联系管理员。</p>
+        <div class="agreement">
+            <h2>君子协定</h2>
+            <ol>
+                <li>禁止二次公开分享订阅（分享者允许的情况除外）；</li>
+                <li>禁止刷流量，优先使用流量较多的订阅下载大文件；</li>
+                <li>人人为我，我为人人。</li><br>
+            </ol>
+        </div>
+        <br><br>
+        <a href="{{ url_for('index') }}" class="auth-button">返回首页</a>
+    </div>
+</body>
+</html>

@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LINUX DO Connect OAuth 验证</title>
+    <style>
+        :root {
+            --primary-color: #8E9AAF;
+            --secondary-color: #e9e3ec;
+            --background-color: #F8E9EB;
+            --text-color: #4f3d7b;
+            --button-color: #FEE1E8;
+            --error-color: #fad8d6;
+            --error-text-color: #ff6262;
+        }
+
+        body, html {
+            font-family: 'Roboto', Arial, sans-serif;
+            background-color: var(--background-color);
+            color: var(--text-color);
+            height: 100%;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            padding-top: 4vh;
+            box-sizing: border-box;
+        }
+
+        .container {
+            background-color: white;
+            max-width: 400px;
+            width: 90%;
+            padding: 40px;
+            border-radius: 4px;
+            box-shadow: 0 3px 6px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+
+        h1 {
+            color: #000000;
+            font-size: 28px;
+            font-weight: 500;
+            margin-bottom: 24px;
+        }
+
+        p {
+            font-size: 16px;
+            line-height: 1.6;
+            margin-bottom: 32px;
+        }
+
+        .auth-button {
+            display: inline-block;
+            padding: 12px 24px;
+            background-color: var(--button-color);
+            color: var(--text-color);
+            text-decoration: none;
+            font-size: 16px;
+            font-weight: 500;
+            border-radius: 4px;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .auth-button:hover {
+            background-color: var(--secondary-color);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+        }
+
+        .agreement {
+            margin-top: 32px;
+            padding: 16px;
+            background-color: var(--secondary-color);
+            border-radius: 4px;
+            font-size: 15px;
+            line-height: 1.4;
+            text-align: left;
+        }
+
+        .agreement h2 {
+            font-size: 18px;
+            margin-bottom: 8px;
+        }
+
+        .agreement ol {
+            margin: 0;
+            padding-left: 20px;
+        }
+
+        .agreement li {
+            margin-bottom: 1px;
+        }
+
+        /* 新增的错误消息样式 */
+        .error-message {
+            margin-top: 16px;
+            padding: 16px;
+            background-color: var(--error-color);
+            border-radius: 4px;
+            font-size: 15px;
+            line-height: 1.4;
+            text-align: left;
+            color: var(--error-text-color);
+        }
+
+        .error-message p {
+            margin: 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1><strong>LINUX DO Connect OAuth</strong></h1>
+        <p><strong>由于这个网站可能会对我造成风险，而我接下来还要面临重要考试，所以我决定于本周关闭此网站。感谢各位的喜欢和支持，但是实在对不起了！</strong></p>
+        <p>为了避免滥用，请你使用 LINUX DO Connect 来进行验证，并确保你的信任等级 ≥ 2。</p>
+        <div class="agreement">
+            <h2>君子协定</h2>
+            <ol>
+                <li>禁止二次公开分享订阅，分享者允许的情况除外；<strong></strong></li>
+                <li>禁止刷流量，优先使用流量较多的订阅下载大文件；</li>
+                <li>人人为我，我为人人。</li><br>
+            </ol>
+        </div>
+        <div class="agreement">
+            <h2>重要通知</h2>
+            <ol>
+                <li>订阅代理功能存在未知错误：能在浏览器中显示代理内容，却无法导入订阅。请先不要将订阅设置为仅展示代理后的链接，谢谢。</li><br>
+            </ol>
+        </div>
+        <!-- 在这里添加错误消息 -->
+        {% if reason == 'low_trust_level' %}
+        <div class="error-message">
+            <strong>您的信任等级不足，无法访问 FSSP。请提升您的信任等级后再试。</strong>
+        </div>
+        {% endif %}
+        <br><br>
+        <a href="{{ url_for('initiate_auth') }}" class="auth-button">Connect</a>
+    </div>
+</body>
+</html>

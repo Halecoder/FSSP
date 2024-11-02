@@ -1,1 +1,496 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>订阅分享 - 首页</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #34597d;
+            --primary-light: #BBDEFB;
+            --primary-dark: #0D47A1;
+            --accent-color: #FF4081;
+            --text-color: #212121;
+            --background-color: #f6fdee;
+            --card-color: #FFFFFF;
+            --shadow: 0 2px 5px rgba(0,0,0,0.1);
+            --avatar-bg-color: #f0f0f0; /* 背景颜色 */
+        }
 
+        body {
+            font-family: 'Roboto', Arial, sans-serif;
+            line-height: 1.6;
+            color: var(--text-color);
+            background-color: var(--background-color);
+            margin: 0;
+            padding: 20px;
+        }
+
+        h1 {
+            color: var(--primary-color);
+            text-align: center;
+            font-weight: 300;
+            margin-bottom: 30px;
+        }
+
+        #share-link-button {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background-color: var(--accent-color);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            text-align: center;
+            text-decoration: none;
+            font-size: 14px;
+            border-radius: 4px;
+            cursor: pointer;
+            box-shadow: var(--shadow);
+            transition: background-color 0.3s;
+        }
+
+        #share-link-button:hover {
+            background-color: #E91E63;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            background-color: var(--card-color);
+            box-shadow: var(--shadow);
+            border-radius: 8px;
+            overflow: hidden;
+            margin-top: 50px;
+        }
+
+        th, td {
+            padding: 15px;
+            text-align: left;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        th {
+            background-color: var(--primary-color);
+            color: white;
+            font-weight: 500;
+        }
+
+        tr:last-child td {
+            border-bottom: none;
+        }
+
+        .text-truncate {
+            max-width: 200px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .avatar-cell {
+            width: 120px; /* 设置列宽度 */
+            text-align: center;
+            vertical-align: middle;
+        }
+
+        .avatar-container {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            width: 100%; /* 让容器宽度填满表格格子 */
+            height: 100%; /* 让容器高度填满表格格子 */
+            padding: 10px;
+            border-radius: 10px; /* 圆角矩形 */
+            background-color: var(--avatar-bg-color); /* 背景颜色 */
+            text-align: center;
+            box-sizing: border-box; /* 确保 padding 不会影响容器大小 */
+        }
+
+
+        .avatar {
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            margin-bottom: 5px;
+        }
+
+        .user-name {
+            display: block;
+            font-size: 13px;
+            color: var(--text-color);
+        }
+
+        .show-more, .copy-button, .like-button, .report-button {
+            padding: 8px 12px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background-color 0.3s;
+            text-decoration: none;
+            display: inline-block;
+            margin-right: 5px;
+        }
+
+        .show-more {
+            background-color: var(--primary-light);
+            color: var(--primary-dark);
+        }
+
+        .show-more:hover {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        .copy-button {
+            background-color: var(--primary-light);
+            color: var(--primary-dark);
+        }
+
+        .copy-button:hover {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        .like-button {
+            background-color: #4CAF50;
+            color: white;
+        }
+
+        .like-button:hover {
+            background-color: #45a049;
+        }
+
+        .report-button {
+            background-color: #f44336;
+            color: white;
+        }
+
+        .report-button:hover {
+            background-color: #da190b;
+        }
+
+        .details-row {
+            display: none;
+        }
+
+        .expanded + .details-row {
+            display: table-row;
+        }
+
+        .details-cell {
+            background-color: #f9f9f9;
+            padding: 20px;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+        }
+
+        .subscription-url {
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+            word-break: break-all;
+        }
+
+        .qr-code {
+            margin-top: 10px;
+        }
+
+        .pagination {
+            margin: 20px 0;
+            text-align: center;
+        }
+
+        .pagination a {
+            color: var(--primary-color);
+            padding: 8px 16px;
+            text-decoration: none;
+            transition: background-color 0.3s;
+            border: 1px solid var(--primary-light);
+            margin: 0 4px;
+            border-radius: 4px;
+        }
+
+        .pagination a.active {
+            background-color: var(--primary-color);
+            color: white;
+            border: 1px solid var(--primary-color);
+        }
+
+        .pagination a:hover:not(.active) {
+            background-color: var(--primary-light);
+        }
+
+        .alert, .success {
+            padding: 15px;
+            color: white;
+            margin-bottom: 15px;
+            position: fixed;
+            width: 100%;
+            top: 0;
+            left: 0;
+            z-index: 1000;
+            text-align: center;
+        }
+
+        .alert {
+            background-color: #f44336;
+        }
+
+        .success {
+            background-color: #4CAF50;
+        }
+
+        .closebtn {
+            margin-left: 15px;
+            color: white;
+            font-weight: bold;
+            float: right;
+            font-size: 22px;
+            line-height: 20px;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        .closebtn:hover {
+            color: black;
+        }
+
+        .subscription-description {
+            background-color: #e3f2fd; /* 淡蓝色背景 */
+            padding: 10px 15px;  /* 内边距，确保文本与边框之间有足够的空间 */
+            border-radius: 8px;  /* 圆角效果 */
+            border: 1px solid #bbdefb;  /* 边框颜色稍深，增加层次感 */
+            color: #1a237e;  /* 深蓝色文本，保持良好的对比度 */
+            font-size: 14px;  /* 适合阅读的字体大小 */
+            margin: 10px 0;  /* 上下间距，使描述与其他元素保持距离 */
+            line-height: 1.5;  /* 提高可读性 */
+            /* box-shadow: 0 2px 5px rgba(0,0,0,0.1);  增加阴影效果，提升视觉层次 */
+        }
+
+    </style>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <script>
+        function toggleText(button) {
+            const row = button.closest('tr'); // 获取包含按钮的行
+            row.classList.toggle('expanded');
+            const detailsRow = row.nextElementSibling; // 获取下一行，作为详细信息行
+
+            if (detailsRow.style.display === 'table-row') {
+                detailsRow.style.display = 'none';
+                button.textContent = '展开';
+            } else {
+                detailsRow.style.display = 'table-row';
+                button.textContent = '收起';
+
+                // 查找详情行内所有的二维码容器，并生成二维码
+                const qrCodeElements = detailsRow.querySelectorAll('.qr-code');
+                qrCodeElements.forEach(qrCodeElement => {
+                    if (!qrCodeElement.hasChildNodes()) {
+                        const url = qrCodeElement.dataset.url;
+                        new QRCode(qrCodeElement, {
+                            text: url,
+                            width: 128,
+                            height: 128
+                        });
+                    }
+                });
+            }
+        }
+
+
+        function copyToClipboard(text) {
+            navigator.clipboard.writeText(text).then(function() {
+                alert('订阅 URL 已复制到剪贴板');
+            }, function(err) {
+                console.error('复制失败:', err);
+            });
+        }
+
+        function likeSubscription(subscriptionId) {
+            fetch(`/like/${subscriptionId}`, { method: 'POST' })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status === 'success') {
+                        showMessage('success', `感谢分享！当前爱心数: ${data.likes}`);
+                        updateLikeCount(subscriptionId, data.likes);
+                    } else if (data.status === 'error') {
+                        showMessage('error', data.message);
+                    }
+                })
+                .catch(error => {
+                    showMessage('error', '请求失败，请稍候再试。（可能是由于订阅已被删除）');
+                });
+        }
+
+        function reportSubscription(subscriptionId) {
+            fetch(`/report/${subscriptionId}`, { method: 'POST' })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status === 'success') {
+                        showMessage('success', `已报告失效！当前失效报告数: ${data.reports}`);
+                        updateReportCount(subscriptionId, data.reports);
+                    } else if (data.status === 'error') {
+                        showMessage('error', data.message);
+                    }
+                })
+                .catch(error => {
+                    showMessage('error', '请求失败，请稍候再试。（可能是由于订阅已被删除）');
+                });
+        }
+
+        function updateLikeCount(subscriptionId, newCount) {
+            const likeElements = document.querySelectorAll(`[data-subscription-id='${subscriptionId}'] .like-count`);
+            likeElements.forEach(element => {
+                element.textContent = newCount;
+            });
+        }
+
+        function updateReportCount(subscriptionId, newCount) {
+            const reportElement = document.querySelector(`[data-subscription-id='${subscriptionId}'] .report-count`);
+            if (reportElement) {
+                reportElement.textContent = newCount;
+            }
+        }
+
+        function showMessage(type, message) {
+            const alertBox = document.createElement('div');
+            alertBox.className = type === 'success' ? 'success' : 'alert';
+            alertBox.innerHTML = `${message} <span class="closebtn" onclick="this.parentElement.style.display='none';">&times;</span>`;
+            document.body.insertBefore(alertBox, document.body.firstChild);
+
+            setTimeout(() => {
+                alertBox.style.display = 'none';
+            }, 5000); // 5秒后自动隐藏
+        }
+
+        function convertToUTC8(utcDate) {
+            const date = new Date(utcDate);
+            date.setHours(date.getHours() + 0);
+            return date.toLocaleString();
+        }
+    </script>
+</head>
+<body>
+    {% if session.get('authenticated') %}
+        <a href="{{ url_for('manage_subscriptions') }}" id="share-link-button">订阅提交与管理面板</a>
+    {% else %}
+        <a href="{{ url_for('share') }}" id="share-link-button">分享你的订阅链接</a>
+    {% endif %}
+    <h1><strong>订阅分享 - 首页</strong></h1>
+    <table>
+        <tr>
+            <th>感谢大善人</th>
+            <th>简略信息</th>
+            <th>剩余流量 (GB)</th>
+            <th>有效期至</th>
+            <th>推广</th>
+            <th>服务提供商</th>
+            <th>订阅 URL</th>
+            <th>提交时间</th>
+            <th>❤ 收获爱心</th>
+            <th>操作</th>
+        </tr>
+        {% for subscription in subscriptions %}
+        <tr data-subscription-id="{{ subscription.id }}">
+            <td class="avatar-cell">
+                <a href="https://linux.do/u/{{ subscription.user_username }}/summary" target="_blank">
+                    <div class="avatar-container">
+                        <img class="avatar" src="{{ url_for('get_avatar_by_id', id=subscription.user_id) }}" alt="Avatar">
+                        <span class="user-name">{{ subscription.user_name }}</span>
+                    </div>
+                </a>
+            </td>
+            <td>{{ subscription.get_summary_info() }}</td>
+            <td>{{ subscription.remaining_data }}</td>
+            <td>{{ subscription.expiry_date }}</td>
+            <td>{{ subscription.includes_aff }}</td>
+            <td>
+                {% if subscription.provider_url != '未填写' and subscription.provider_url != '自建' %}
+                <div class="text-truncate"><a href="{{ subscription.provider_url }}" target="_blank">{{ subscription.provider_url }}</a></div>
+                {% else %}
+                <div class="text-truncate">{{ subscription.provider_url }}</div>
+                {% endif %}
+            </td>
+            <td>
+                <div class="text-truncate"><a href="{{ subscription.subscription_url }}" target="_blank">{{ subscription.subscription_url }}</a></div>
+            </td>
+            <td><script>document.write(convertToUTC8('{{ subscription.created_at.strftime('%Y-%m-%dT%H:%M:%S') }}Z'));</script></td>
+            <td class="like-count">{{ subscription.likes }}</td>
+            <td><button class="show-more" onclick="toggleText(this)">展开</button></td>
+        </tr>
+        <tr class="details-row" data-subscription-id="{{ subscription.id }}">
+            <td colspan="10" class="details-cell">
+                <strong>简略信息:</strong> {{ subscription.get_full_tags() }}<br>
+                <strong>提交时的剩余流量:</strong> {{ subscription.remaining_data }} GB<br>
+                <strong>有效期至:</strong> {{ subscription.expiry_date }}<br>
+                <strong>推广:</strong> {{ subscription.includes_aff }}<br>
+                <strong>服务提供商 URL:</strong> 
+                {% if subscription.provider_url != '未填写' and subscription.provider_url != '自建' %}
+                <a href="{{ subscription.provider_url }}" target="_blank">{{ subscription.provider_url }}</a><br>
+                {% else %}
+                {{ subscription.provider_url }}<br>
+                {% endif %}
+                <strong>订阅 URL:</strong> 
+                <a href="{{ subscription.subscription_url }}" target="_blank" class="subscription-url">{{ subscription.subscription_url }}</a>
+                <button class="copy-button" onclick="copyToClipboard('{{ subscription.subscription_url }}')">复制</button><br>
+                <div class="qr-code" data-url="{{ subscription.subscription_url }}"></div><br>
+                {% if subscription.encrypted_id and (subscription.subscription_url|lower).startswith('http') %}
+                    <strong>订阅 URL（已代理）:</strong> 
+                    <a href="https://fssp.byws.online/getsub/{{ subscription.encrypted_id }}" target="_blank" class="subscription-url">{{ "https://fssp.byws.online/getsub/" + subscription.encrypted_id }}</a>
+                    <button class="copy-button" onclick="copyToClipboard('{{ "https://fssp.byws.online/getsub/" + subscription.encrypted_id }}')">复制</button><br>
+                    <div class="qr-code" data-url="{{ "https://fssp.byws.online/getsub/" + subscription.encrypted_id }}"></div><br>
+                {% else %}
+                    <strong>订阅 URL（已代理）:</strong> 非订阅 URL，无需代理。<br>
+                {% endif %}
+                <!-- 新增的描述信息显示 -->
+                <strong>订阅描述:</strong>
+                <div class="subscription-description">
+                    {% if subscription.additional_information %}
+                        <p>{{ subscription.additional_information | replace('\n', '<br>')|safe }}</p>
+                    {% else %}
+                        <p>没有提供额外的描述。</p>
+                    {% endif %}
+                </div>
+
+                <strong>授权信息:</strong> 
+                {% if 'FSSP' in subscription.get_full_tags() %}
+                    🔒 仅限 FSSP 平台公开分享
+                {% elif 'Public' in subscription.get_full_tags() %}
+                    🌏 允许再次公开分享此订阅
+                {% endif %}
+                <br>
+                <strong>提交时间:</strong> <script>document.write(convertToUTC8('{{ subscription.created_at.strftime('%Y-%m-%dT%H:%M:%S') }}Z'));</script><br>
+                <strong>收获爱心:</strong> <span class="like-count">{{ subscription.likes }}</span><br>
+                <strong>失效 / 不好用报告:</strong> <span class="report-count">{{ subscription.reports }}</span><br><br>
+                <button class="like-button" onclick="likeSubscription({{ subscription.id }})">感谢分享 / 好用</button>
+                <button class="report-button" onclick="reportSubscription({{ subscription.id }})">订阅失效 / 不好用</button>
+            </td>
+        </tr>        
+        {% endfor %}
+    </table>
+    <div class="pagination">
+        {% if pagination.has_prev %}
+            <a href="{{ url_for('index', page=pagination.prev_num) }}">&laquo;</a>
+        {% endif %}
+    
+        {% for page_num in pagination.iter_pages() %}
+            {% if page_num %}
+                {% if page_num == pagination.page %}
+                    <a class="active">{{ page_num }}</a>
+                {% else %}
+                    <a href="{{ url_for('index', page=page_num) }}">{{ page_num }}</a>
+                {% endif %}
+            {% else %}
+                <span>…</span>
+            {% endif %}
+        {% endfor %}
+    
+        {% if pagination.has_next %}
+            <a href="{{ url_for('index', page=pagination.next_num) }}">&raquo;</a>
+        {% endif %}
+    </div>
+</body>
+</html>

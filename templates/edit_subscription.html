@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <title>{{ '编辑' if subscription else '分享' }} 订阅</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f4f4f4;
+        }
+        h1 {
+            color: #2c3e50;
+            text-align: center;
+        }
+        form {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        label {
+            display: block;
+            margin-top: 10px;
+            font-weight: bold;
+        }
+        input[type="text"], input[type="url"], input[type="number"], input[type="date"], select, textarea {
+            width: 100%;
+            padding: 8px;
+            margin-top: 5px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+            font-family: Arial, sans-serif;
+            font-size: 16px;
+            line-height: 1.4;
+            resize: vertical;
+            background-color: #fff;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            outline: none;
+            transition: border-color 0.3s ease;
+        }
+        textarea:focus, input[type="text"]:focus, input[type="url"]:focus, input[type="number"]:focus, input[type="date"]:focus, select:focus {
+            border-color: #3498db;
+            box-shadow: 0 0 10px rgba(52, 152, 219, 0.2);
+        }
+        input[type="submit"] {
+            background-color: #3498db;
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            margin-top: 20px;
+            transition: background-color 0.3s;
+        }
+        input[type="submit"]:hover {
+            background-color: #2980b9;
+        }
+        .checkbox-group {
+            margin-top: 10px;
+        }
+        .checkbox-group label {
+            display: inline-block;
+            margin-right: 15px;
+            font-weight: normal;
+        }
+        a {
+            display: block;
+            text-align: center;
+            margin-top: 20px;
+            color: #3498db;
+            text-decoration: none;
+        }
+        a:hover {
+            text-decoration: underline;
+        }
+
+        #home-link-button, #manage-panel-button {
+            position: absolute;
+            top: 20px;
+            padding: 10px 20px;
+            color: white;
+            border: none;
+            text-align: center;
+            text-decoration: none;
+            font-size: 14px;
+            border-radius: 4px;
+            cursor: pointer;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            transition: background-color 0.3s;
+        }
+
+        #home-link-button {
+            right: 20px;
+            background-color: #3498db;
+        }
+
+        #home-link-button:hover {
+            background-color: #2980b9;
+        }
+
+        #manage-panel-button {
+            left: 20px;
+            background-color: #FF4081;
+        }
+
+        #manage-panel-button:hover {
+            background-color: #E91E63;
+        }
+
+        .auth-toggle-btn, .proxy-toggle-btn {
+            background-color: #65f9a2;
+            color: rgb(19, 53, 0);
+            padding: 10px 15px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            margin-top: 10px;
+            display: block;
+            width: 30%;
+            text-align: left;
+            transition: background-color 0.3s ease;
+        }
+
+        .auth-toggle-btn:hover, .proxy-toggle-btn:hover {
+            background-color: #5adf92;
+        }
+
+        .auth-toggle-btn[data-auth="Public"], .proxy-toggle-btn[data-proxy="on"] {
+            background-color: #d8e995;
+        }
+
+        .auth-toggle-btn[data-auth="Public"]:hover, .proxy-toggle-btn[data-proxy="on"]:hover {
+            background-color: #ccdc8f;
+        }
+
+        .auth-toggle-btn[disabled], .proxy-toggle-btn[disabled] {
+            background-color: #ccc;
+            cursor: not-allowed;
+        }
+    </style>
+</head>
+<body>
+    <h1>编辑订阅</h1>
+    <a href="{{ url_for('manage_subscriptions') }}" id="manage-panel-button">返回管理面板</a>
+    <form name="subscriptionForm" action="{{ url_for('edit_subscription', subscription_id=subscription.id) }}" method="post" onsubmit="return validateForm()">
+        <div class="subscription-container">
+            <label for="is_self_built">订阅来源：</label>
+            <select id="is_self_built" name="is_self_built" required onchange="handleSourceChange(this)">
+                <option value="自建" {% if subscription.is_self_built == '自建' %}selected{% endif %}>自建</option>
+                <option value="自购" {% if subscription.is_self_built == '自购' %}selected{% endif %}>自购</option>
+                <option value="网上搜集" {% if subscription.is_self_built == '网上搜集' %}selected{% endif %}>网上搜集</option>
+            </select>
+
+            <label for="remaining_data">剩余流量 (GB)：</label>
+            <input type="number" id="remaining_data" name="remaining_data" step="0.1" required value="{{ subscription.remaining_data }}">
+
+            <label for="expiry_date">有效期至：</label>
+            <input type="date" id="expiry_date" name="expiry_date" value="{{ subscription.expiry_date }}">
+
+            <label for="includes_aff">是否包含推广：</label>
+            <select id="includes_aff" name="includes_aff">
+                <option value="不含 AFF" {% if subscription.includes_aff == '不含 AFF' %}selected{% endif %}>不含 AFF</option>
+                <option value="双方获利 AFF" {% if subscription.includes_aff == '双方获利 AFF' %}selected{% endif %}>双方获利 AFF</option>
+                <option value="分享者获利 AFF" {% if subscription.includes_aff == '分享者获利 AFF' %}selected{% endif %}>分享者获利 AFF</option>
+            </select>
+
+            <label for="provider_url">服务提供商 URL：</label>
+            <input type="url" id="provider_url" name="provider_url" value="{{ subscription.provider_url if subscription.provider_url != '未填写' else '' }}" pattern="^[^\u4e00-\u9fa5\u3040-\u30ff]+$" title="服务提供商 URL 不能包含中文或日文字符。">
+
+            <label for="subscription_url">订阅 URL：</label>
+            <input type="url" id="subscription_url" name="subscription_url" value="{{ subscription.subscription_url }}" pattern="^[^\u4e00-\u9fa5\u3040-\u30ff]+$" title="订阅 URL 不能包含中文或日文字符。" required>
+
+            <label>标签：</label>
+            <div class="checkbox-group">
+                {% for tag in tags %}
+                    {% if tag.name not in ['FSSP', 'Public', 'Proxied'] %}
+                        <label>
+                            <input type="checkbox" name="tags" value="{{ tag.name }}" 
+                            {% if tag.name in subscription.tags|map(attribute='name')|list %}checked{% endif %}>
+                            {{ tag.name }}
+                        </label>
+                    {% endif %}
+                {% endfor %}
+                <!-- 新增的 Proxied 标签 -->
+                <label>
+                    <input type="checkbox" name="tags" value="Proxied" 
+                    {% if 'Proxied' in subscription.tags|map(attribute='name')|list %}checked{% endif %}>
+                    Proxied
+                </label>
+            </div>
+
+            <!-- 新增的订阅描述字段 -->
+            <label for="additional_information">订阅描述（可选，最多 800 字符）：</label>
+            <textarea id="additional_information" name="additional_information" maxlength="800" rows="5" placeholder="简要介绍一下你的订阅吧！">{{ subscription.additional_information or '' }}</textarea>
+
+            <label for="authorization">订阅授权：</label>
+            <div class="checkbox-group">
+                <button type="button" class="auth-toggle-btn" id="authToggleBtn" onclick="toggleAuthorization(this)" data-auth="{{ 'Public' if 'Public' in subscription.tags|map(attribute='name')|list else 'FSSP' }}">
+                    {% if 'Public' in subscription.tags|map(attribute='name')|list %}
+                        允许再次公开分享此订阅
+                    {% else %}
+                        仅限 FSSP 平台公开分享
+                    {% endif %}
+                </button>
+                <input type="hidden" id="authHiddenInput" name="authorization" value="{{ 'Public' if 'Public' in subscription.tags|map(attribute='name')|list else 'FSSP' }}">
+            </div>
+
+            <label for="proxy">订阅代理：</label>
+            <div class="checkbox-group">
+                <button type="button" class="proxy-toggle-btn" id="proxyToggleBtn" onclick="toggleProxy(this)" data-proxy="{{ 'on' if 'Proxied' in subscription.tags|map(attribute='name')|list else 'off' }}">
+                    {% if 'Proxied' in subscription.tags|map(attribute='name')|list %}
+                        启用代理
+                    {% else %}
+                        不启用代理
+                    {% endif %}
+                </button>
+                <input type="hidden" id="proxyHiddenInput" name="proxy" value="{{ 'Proxied' if 'Proxied' in subscription.tags|map(attribute='name')|list else '' }}">
+            </div>
+
+            <input type="submit" value="更新">
+        </div>
+    </form>
+
+    <script>
+        /**
+         * 切换订阅授权状态
+         * @param {HTMLElement} button - 被点击的授权按钮
+         */
+        function toggleAuthorization(button) {
+            if (button.disabled) return;
+
+            const currentAuth = button.getAttribute('data-auth');
+            const newAuth = currentAuth === 'FSSP' ? 'Public' : 'FSSP';
+            const newText = newAuth === 'FSSP' ? '仅限 FSSP 平台公开分享' : '允许再次公开分享此订阅';
+
+            button.textContent = newText;
+            button.setAttribute('data-auth', newAuth);
+
+            const hiddenInput = document.getElementById('authHiddenInput');
+            hiddenInput.value = newAuth;
+
+            // 自动勾选或取消相关标签
+            const publicCheckbox = document.querySelector('input[name="tags"][value="Public"]');
+            const fsspCheckbox = document.querySelector('input[name="tags"][value="FSSP"]');
+
+            if (newAuth === 'Public') {
+                if (publicCheckbox) publicCheckbox.checked = true;
+                if (fsspCheckbox) fsspCheckbox.checked = false;
+            } else {
+                if (publicCheckbox) publicCheckbox.checked = false;
+                if (fsspCheckbox) fsspCheckbox.checked = true;
+            }
+        }
+
+        /**
+         * 切换订阅代理状态
+         * @param {HTMLElement} button - 被点击的代理按钮
+         */
+        function toggleProxy(button) {
+            if (button.disabled) return;
+
+            const currentProxy = button.getAttribute('data-proxy');
+            let newProxy, newText;
+
+            if (currentProxy === 'off') {
+                newProxy = 'on';
+                newText = '启用代理';
+            } else {
+                newProxy = 'off';
+                newText = '不启用代理';
+            }
+
+            // 更新按钮文本和 data-proxy 属性
+            button.textContent = newText;
+            button.setAttribute('data-proxy', newProxy);
+
+            // 更新隐藏输入字段的值
+            const hiddenInput = document.getElementById('proxyHiddenInput');
+            if (newProxy === 'on') {
+                hiddenInput.value = 'Proxied';
+            } else {
+                hiddenInput.value = '';
+            }
+
+            // 勾选或取消 "Proxied" 标签
+            const proxiedCheckbox = document.querySelector('input[name="tags"][value="Proxied"]');
+            if (proxiedCheckbox) {
+                proxiedCheckbox.checked = newProxy === 'on';
+            }
+        }
+
+        /**
+         * 根据订阅来源调整授权按钮和相关标签状态
+         * @param {HTMLSelectElement} selectElement - 被更改的订阅来源选择框
+         */
+        function handleSourceChange(selectElement) {
+            const authButton = document.getElementById('authToggleBtn');
+            const hiddenAuthInput = document.getElementById('authHiddenInput');
+
+            if (selectElement.value === '网上搜集') {
+                authButton.textContent = '允许再次公开分享此订阅';
+                authButton.setAttribute('data-auth', 'Public');
+                authButton.disabled = true;
+                hiddenAuthInput.value = 'Public';
+
+                // 自动勾选 "Public" 标签，并取消 "FSSP" 标签
+                const publicCheckbox = document.querySelector('input[name="tags"][value="Public"]');
+                const fsspCheckbox = document.querySelector('input[name="tags"][value="FSSP"]');
+
+                if (publicCheckbox) publicCheckbox.checked = true;
+                if (fsspCheckbox) fsspCheckbox.checked = false;
+            } else {
+                authButton.textContent = '仅限 FSSP 平台公开分享';
+                authButton.setAttribute('data-auth', 'FSSP');
+                authButton.disabled = false;
+                hiddenAuthInput.value = 'FSSP';
+
+                // 自动勾选 "FSSP" 标签，并取消 "Public" 标签
+                const publicCheckbox = document.querySelector('input[name="tags"][value="Public"]');
+                const fsspCheckbox = document.querySelector('input[name="tags"][value="FSSP"]');
+
+                if (publicCheckbox) publicCheckbox.checked = false;
+                if (fsspCheckbox) fsspCheckbox.checked = true;
+            }
+        }
+
+        /**
+         * 表单验证函数
+         * @returns {boolean} - 如果验证通过返回 true，阻止表单提交返回 false
+         */
+        function validateForm() {
+            let valid = true;
+
+            // 验证剩余流量
+            const remainingDataInput = document.getElementById("remaining_data");
+            if (remainingDataInput.value.trim() === "") {
+                remainingDataInput.value = "200";  // 默认值为 200G
+            } else {
+                const remainingValue = parseFloat(remainingDataInput.value);
+                if (isNaN(remainingValue)) {
+                    alert("剩余流量必须是一个有效的数字。");
+                    remainingDataInput.focus();
+                    valid = false;
+                } else if (remainingValue > 1000000) {
+                    alert("剩余流量不能超过 1,000,000 GB。");
+                    remainingDataInput.focus();
+                    valid = false;
+                } else if (remainingValue < 0) {
+                    alert("剩余流量不能为负数。");
+                    remainingDataInput.focus();
+                    valid = false;
+                }
+            }
+
+            if (!valid) {
+                return false;  // 阻止表单提交
+            }
+
+            // 验证服务提供商 URL
+            const providerUrls = document.getElementsByName("provider_url");
+            providerUrls.forEach(input => {
+                if (input.value.trim() === "") {
+                    input.value = "未填写";
+                } else {
+                    const pattern = /^[^\u4e00-\u9fa5\u3040-\u30ff]+$/;
+                    if (!pattern.test(input.value)) {
+                        alert("服务提供商 URL 不能包含中文或日文字符。");
+                        input.focus();
+                        valid = false;
+                    }
+                }
+            });
+
+            if (!valid) {
+                return false;  // 阻止表单提交
+            }
+
+            // 验证订阅 URL
+            const subscriptionUrlInput = document.getElementById("subscription_url");
+            const subscriptionUrlPattern = /^[^\u4e00-\u9fa5\u3040-\u30ff]+$/;
+            if (!subscriptionUrlPattern.test(subscriptionUrlInput.value)) {
+                alert("订阅 URL 不能包含中文或日文字符。");
+                subscriptionUrlInput.focus();
+                valid = false;
+            }
+
+            if (!valid) {
+                return false;  // 阻止表单提交
+            }
+
+            // 验证订阅描述
+            const descriptionInput = document.getElementById('additional_information');
+            if (descriptionInput.value.trim().length > 800) {
+                alert("描述不能超过 800 字符。");
+                descriptionInput.focus();
+                valid = false;
+            }
+
+            if (!valid) {
+                return false;  // 阻止表单提交
+            }
+
+            // 确保授权和代理信息正确设置
+            const authButton = document.getElementById('authToggleBtn');
+            const hiddenAuthInput = document.getElementById('authHiddenInput');
+            hiddenAuthInput.value = authButton.getAttribute('data-auth');
+
+            const proxyButton = document.getElementById('proxyToggleBtn');
+            const hiddenProxyInput = document.getElementById('proxyHiddenInput');
+            hiddenProxyInput.value = proxyButton.getAttribute('data-proxy') === 'on' ? 'Proxied' : '';
+
+            return true;  // 允许表单提交
+        }
+
+        /**
+         * 初始化授权和代理按钮状态
+         */
+        function initializeAuthorization() {
+            const selectElement = document.getElementById('is_self_built');
+            handleSourceChange(selectElement);
+        }
+
+        document.addEventListener('DOMContentLoaded', initializeAuthorization);
+    </script>
+</body>
+</html>
